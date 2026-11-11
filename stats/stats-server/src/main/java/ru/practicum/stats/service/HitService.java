@@ -31,7 +31,7 @@ public class HitService {
                                          List<String> uris, boolean unique) {
         List<ViewStats> stats;
         if (start.isAfter(end)) {
-            throw new InvalidTimeRangeException("Неккоректный интервал времени");
+            throw new InvalidTimeRangeException("Некорректный интервал времени");
         }
         if (uris == null || uris.isEmpty()) {
             stats = hitRepository.noFilterByUris(start, end, unique);
