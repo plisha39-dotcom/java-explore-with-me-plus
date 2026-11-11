@@ -3,6 +3,7 @@ package ru.practicum.stats.repository;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import ru.practicum.stats.dto.ViewStats;
 import ru.practicum.stats.model.Hit;
 
 import java.time.LocalDateTime;
@@ -10,7 +11,7 @@ import java.util.List;
 
 public interface HitRepository extends JpaRepository<Hit, Long> {
     @Query("""
-            SELECT new ru.practicum.dto.ViewStats(h.app, h.uri,
+            SELECT new ru.practicum.stats.dto.ViewStats(h.app, h.uri,
                         CASE
                             WHEN :unique = true THEN COUNT(DISTINCT h.ip)
                             ELSE COUNT(h)
@@ -29,7 +30,7 @@ public interface HitRepository extends JpaRepository<Hit, Long> {
                                    @Param("unique") boolean unique);
 
     @Query("""
-            SELECT new ru.practicum.dto.ViewStats(h.app, h.uri,
+            SELECT new ru.practicum.stats.dto.ViewStats(h.app, h.uri,
                         CASE
                             WHEN :unique = true THEN COUNT(DISTINCT h.ip)
                             ELSE COUNT(h)

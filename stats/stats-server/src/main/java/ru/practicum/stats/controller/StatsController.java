@@ -8,6 +8,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import ru.practicum.stats.dto.EndpointHit;
+import ru.practicum.stats.dto.ViewStats;
 import ru.practicum.stats.service.HitService;
 
 import java.time.LocalDateTime;
@@ -23,7 +25,7 @@ public class StatsController {
 
     @PostMapping("/hit")
     @ResponseStatus(HttpStatus.CREATED)
-    public void save(@RequestBody EndpiontHit endpointHit) {
+    public void save(@RequestBody EndpointHit endpointHit) {
         hitService.save(endpointHit);
     }
 

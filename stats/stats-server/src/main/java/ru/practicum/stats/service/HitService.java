@@ -1,6 +1,9 @@
 package ru.practicum.stats.service;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.stats.dto.EndpointHit;
+import ru.practicum.stats.dto.ViewStats;
 import ru.practicum.stats.exception.InvalidTimeRangeException;
 import ru.practicum.stats.mapper.HitMapper;
 import ru.practicum.stats.model.Hit;
@@ -17,11 +20,13 @@ public class HitService {
         this.hitRepository = hitRepository;
     }
 
+    @Transactional
     public Hit save(EndpointHit endpointHit) {
         Hit hit = HitMapper.toHit(endpointHit);
         return hitRepository.save(hit);
     }
 
+    @Transactional(readOnly = true)
     public List<ViewStats> getStatistics(LocalDateTime start, LocalDateTime end,
                                          List<String> uris, boolean unique) {
         List<ViewStats> stats;

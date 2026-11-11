@@ -5,6 +5,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import ru.practicum.stats.dto.EndpointHit;
+import ru.practicum.stats.dto.ViewStats;
 import ru.practicum.stats.exception.InvalidTimeRangeException;
 import ru.practicum.stats.model.Hit;
 import ru.practicum.stats.repository.HitRepository;
