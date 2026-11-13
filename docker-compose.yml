@@ -5,6 +5,10 @@ services:
 
   stats-db:
     image: postgres:16.1
+    environment:
+    POSTGRES_USER: user
+    POSTGRES_PASSWORD: ${STATS_DB_PASSWORD}
+    POSTGRES_DB: stats
 
   ewm-service:
     ports:

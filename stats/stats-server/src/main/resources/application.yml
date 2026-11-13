@@ -1,0 +1,10 @@
+server:
+  port: 9090
+
+spring.jpa.hibernate.ddl-auto: none
+spring.jpa.properties.hibernate.format_sql: true
+spring.sql.init.mode: always
+  #---
+spring.datasource.url: jdbc:postgresql://stats-db:5433/stats
+spring.datasource.username: user
+spring.datasource.password: ${STATS_DB_PASSWORD}
