@@ -1,11 +1,16 @@
 package client;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.util.UriComponentsBuilder;
+import ru.practicum.stats.dto.EndpointHit;
+import ru.practicum.stats.dto.ViewStats;
+
+import java.util.List;
 
 @Slf4j
 @Component
@@ -18,7 +23,7 @@ public class StatClient {
         this.statsServerProperties = statsServerProperties;
     }
 
-    public void hit(HitDto hitDto) {
+    public EndpointHit hit(EndpointHit endpointHit) {
         UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder
                 .fromHttpUrl(statsServerProperties.baseUrl().toString() + "/hits");
         try {
@@ -26,12 +31,11 @@ public class StatClient {
             return restClient.post()
                     .uri(uriComponentsBuilder.toUriString())
                     .contentType(MediaType.APPLICATION_JSON)
-                    .body(hitDto)
+                    .body(endpointHit)
                     .retrieve()
-                    .body(hitDto.class);
+                    .body(EndpointHit.class);
 
-        } catch (
-                RestClientResponseException e) {
+        } catch (RestClientResponseException e) {
 
             log.error("HTTP status: {}", e.getStatusCode());
             log.error("Response: {}", e.getResponseBodyAsString());
@@ -40,17 +44,16 @@ public class StatClient {
         }
     }
 
-    public List<StatDto> get() {
+    public List<ViewStats> get() {
         UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder
                 .fromHttpUrl(statsServerProperties.baseUrl().toString() + "/stats");
         try {
             return restClient.get()
                     .uri(uriComponentsBuilder.toUriString())
                     .retrieve()
-                    .body(new ParameterizedTypeReference<List<StatDto>>() {
+                    .body(new ParameterizedTypeReference<List<ViewStats>>() {
                     });
-        } catch (
-                RestClientResponseException e) {
+        } catch (RestClientResponseException e) {
 
             log.error("HTTP status: {}", e.getStatusCode());
             log.error("Response: {}", e.getResponseBodyAsString());
