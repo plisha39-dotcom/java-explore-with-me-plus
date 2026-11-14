@@ -20,9 +20,12 @@ public class MainApplication {
 
         //Проверка работы клиента и сервера
         StatClient statClient = context.getBean(StatClient.class);
-        statClient.hit(new EndpointHit("App", "https://test.com","127.0.0.1", LocalDateTime.now()));
-        List<ViewStats> viewStats = statClient.get();
+        statClient.hit(new EndpointHit("App", "https://test.com", "127.0.0.1", LocalDateTime.now()));
+        List<ViewStats> viewStats = statClient.get(
+                "2026-11-01 08:00:00",
+                "2026-11-10 18:00:00",
+                List.of("https://test1", "https://test2"),
+                true);
         System.out.println(viewStats);
-
     }
 }

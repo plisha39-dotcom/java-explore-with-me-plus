@@ -3,6 +3,7 @@ package client;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientResponseException;
@@ -23,9 +24,9 @@ public class StatClient {
         this.statsServerProperties = statsServerProperties;
     }
 
-    public EndpointHit hit(EndpointHit endpointHit) {
+    public ResponseEntity<Void> hit(EndpointHit endpointHit) {
         UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder
-                .fromHttpUrl(statsServerProperties.baseUrl().toString() + "/hits");
+                .fromHttpUrl(statsServerProperties.baseUrl().toString() + "/hit");
         try {
 
             return restClient.post()
@@ -33,7 +34,7 @@ public class StatClient {
                     .contentType(MediaType.APPLICATION_JSON)
                     .body(endpointHit)
                     .retrieve()
-                    .body(EndpointHit.class);
+                    .toBodilessEntity();
 
         } catch (RestClientResponseException e) {
 
@@ -44,9 +45,13 @@ public class StatClient {
         }
     }
 
-    public List<ViewStats> get() {
+    public List<ViewStats> get(String start, String end, List<String> uris, boolean unique) {
         UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder
-                .fromHttpUrl(statsServerProperties.baseUrl().toString() + "/stats");
+                .fromHttpUrl(statsServerProperties.baseUrl().toString() + "/stats")
+                .queryParam("start", start)
+                .queryParam("end", end)
+                .queryParam("uris", uris)
+                .queryParam("unique", unique);
         try {
             return restClient.get()
                     .uri(uriComponentsBuilder.toUriString())

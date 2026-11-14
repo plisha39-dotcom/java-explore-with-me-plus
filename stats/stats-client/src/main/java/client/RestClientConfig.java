@@ -24,6 +24,7 @@ public class RestClientConfig {
         requestFactory.setReadTimeout(statsServerProperties.readTimeout());
 
         return RestClient.builder()
+                .requestFactory(requestFactory)
                 .baseUrl(statsServerProperties.baseUrl().toString())
                 .build();
     }
