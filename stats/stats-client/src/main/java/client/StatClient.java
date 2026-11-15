@@ -1,11 +1,12 @@
 package client;
 
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.annotation.Bean;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -14,11 +15,13 @@ import ru.practicum.stats.dto.ViewStats;
 
 import java.util.List;
 
-@Slf4j
 @Component
 public class StatClient {
     private final RestClient restClient;
     private final StatsServerProperties statsServerProperties;
+    private static final Logger log =
+            LoggerFactory.getLogger(ExceptionHandler.class);
+
 
     public StatClient(RestClient restClient, StatsServerProperties statsServerProperties) {
         this.restClient = restClient;
