@@ -12,7 +12,7 @@ import java.net.http.HttpClient;
 @EnableConfigurationProperties(StatsServerProperties.class)
 public class RestClientConfig {
     @Bean
-    public RestClient StatRestClient(StatsServerProperties statsServerProperties) {
+    public RestClient statRestClient(StatsServerProperties statsServerProperties) {
 
         HttpClient httpClient = HttpClient.newBuilder()
                 .connectTimeout(statsServerProperties.connectTimeout())
