@@ -51,14 +51,14 @@ public class StatClient {
 
     public List<ViewStats> get(String start, String end, List<String> uris, boolean unique) {
         UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder
-                .fromHttpUrl(statsServerProperties.baseUrl().toString() + "/stats")
+                .fromUri(statsServerProperties.baseUrl()).path("/stats")
                 .queryParam("start", start)
                 .queryParam("end", end)
                 .queryParam("uris", uris)
                 .queryParam("unique", unique);
         try {
             return restClient.get()
-                    .uri(uriComponentsBuilder.toUriString())
+                    .uri(uriComponentsBuilder.build().encode().toUri())
                     .retrieve()
                     .body(new ParameterizedTypeReference<List<ViewStats>>() {
                     });
