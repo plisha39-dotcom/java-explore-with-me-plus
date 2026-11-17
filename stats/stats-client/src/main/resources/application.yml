@@ -1,0 +1,5 @@
+stats:
+  server:
+    base-url: http://stats-server:9090
+    connect-timeout: 2s
+    read-timeout: 5s
