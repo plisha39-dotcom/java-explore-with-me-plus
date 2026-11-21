@@ -1,0 +1,31 @@
+package ewm.exception;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+@RestControllerAdvice
+public class ApiExceptionHandler {
+    private static final String NOT_FOUND_REASON = "The required object was not found.";
+    private static final String CONFLICT_REASON = "For the requested operation the conditions are not met.";
+
+    @ExceptionHandler(NotFoundException.class)
+    public ResponseEntity<ApiError> handleNotFound(NotFoundException exception) {
+        return response(HttpStatus.NOT_FOUND, NOT_FOUND_REASON, exception.getMessage(), List.of());
+    }
+
+    @ExceptionHandler(ConflictException.class)
+    public ResponseEntity<ApiError> handleConflict(ConflictException exception) {
+        return response(HttpStatus.CONFLICT, CONFLICT_REASON, exception.getMessage(), List.of());
+    }
+
+    private ResponseEntity<ApiError> response(HttpStatus status, String reason,
+                                              String message, List<String> errors) {
+        ApiError body = new ApiError(errors, message, reason, status.name(), LocalDateTime.now());
+        return ResponseEntity.status(status).body(body);
+    }
+}
