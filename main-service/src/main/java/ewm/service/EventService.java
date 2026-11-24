@@ -1,6 +1,7 @@
 package ewm.service;
 
 import ewm.dto.EventFullDto;
+import ewm.dto.EventShortDto;
 import ewm.dto.NewEventDto;
 import ewm.exception.BadRequestException;
 import ewm.exception.NotFoundException;
@@ -12,9 +13,12 @@ import ewm.repository.CategoryRepository;
 import ewm.repository.EventRepository;
 import ewm.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -25,9 +29,9 @@ public class EventService {
 
     public EventFullDto create(Long userId, NewEventDto newEventDto) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("Пользователь с ID: " + userId + " не найден"));
+                                  .orElseThrow(() -> new NotFoundException("Пользователь с ID: " + userId + " не найден"));
         Category category = categoryRepository.findById(newEventDto.getCategory())
-                .orElseThrow(() -> new NotFoundException("Категория не найдена"));
+                                              .orElseThrow(() -> new NotFoundException("Категория не найдена"));
         if (newEventDto.getEventDate().isBefore(LocalDateTime.now().plusHours(2))) {
             throw new BadRequestException("Неверная дата события");
         }
@@ -35,5 +39,15 @@ public class EventService {
         event.setCreatedOn(LocalDateTime.now());
         Event savedEvent = eventRepository.save(event);
         return EventMapper.toFullDto(savedEvent, 0L, 0L);
+    }
+
+    public List<EventShortDto> findAllByUser(Long userId, int from, int size) {
+        userRepository.findById(userId)
+                      .orElseThrow(() -> new NotFoundException("Пользователь с ID: " + userId + " не найден"));
+        Pageable pageable = PageRequest.of(from / size, size);
+        List<Event> events = eventRepository.findAllByInitiatorId(userId, pageable);
+        return events.stream()
+                     .map(event -> EventMapper.toShortDto(event, 0L, 0L))
+                     .toList();
     }
 }

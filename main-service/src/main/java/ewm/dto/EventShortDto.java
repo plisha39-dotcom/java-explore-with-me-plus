@@ -1,11 +1,13 @@
 package ewm.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import lombok.Builder;
 import lombok.Data;
 
 import java.time.LocalDateTime;
 
 @Data
+@Builder
 public class EventShortDto {
     private Long id;
     private String annotation;

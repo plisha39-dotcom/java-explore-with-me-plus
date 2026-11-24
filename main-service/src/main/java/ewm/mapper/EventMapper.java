@@ -2,6 +2,7 @@ package ewm.mapper;
 
 import ewm.dto.CategoryDto;
 import ewm.dto.EventFullDto;
+import ewm.dto.EventShortDto;
 import ewm.dto.LocationDto;
 import ewm.dto.NewEventDto;
 import ewm.dto.UserShortDto;
@@ -69,5 +70,19 @@ public class EventMapper {
         locationDto.setLat(location.getLat());
         locationDto.setLon(location.getLon());
         return locationDto;
+    }
+
+    public static EventShortDto toShortDto(Event event, Long views, Long confirmedRequests) {
+        return EventShortDto.builder()
+                            .id(event.getId())
+                            .annotation(event.getAnnotation())
+                            .category(toCategoryDto(event.getCategory()))
+                            .confirmedRequests(views)
+                            .eventDate(event.getEventDate())
+                            .initiator(toUserShortDto(event.getInitiator()))
+                            .paid(event.isPaid())
+                            .title(event.getTitle())
+                            .views(confirmedRequests)
+                            .build();
     }
 }
