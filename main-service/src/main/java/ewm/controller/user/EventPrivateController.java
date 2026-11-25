@@ -36,10 +36,15 @@ public class EventPrivateController {
     }
 
     @GetMapping("/{userId}/events")
-    @ResponseStatus(HttpStatus.OK)
     public List<EventShortDto> findAllByUser(@PathVariable Long userId,
                                              @PositiveOrZero @RequestParam(name = "from", defaultValue = "0") int from,
                                              @Positive @RequestParam(name = "size", defaultValue = "10") int size) {
         return eventService.findAllByUser(userId, from, size);
+    }
+
+    @GetMapping("/{userId}/events/{eventId}")
+    public EventFullDto findUserEvent(@PathVariable Long userId,
+                                            @PathVariable Long eventId) {
+        return eventService.findUserEvent(userId, eventId);
     }
 }

@@ -47,20 +47,20 @@ public class ApiExceptionHandler {
     @ExceptionHandler(HandlerMethodValidationException.class)
     private ResponseEntity<ApiError> handleMethodValidation(HandlerMethodValidationException exception) {
         List<String> errors = exception.getAllErrors().stream()
-                .map(MessageSourceResolvable::getDefaultMessage)
-                .toList();
+                                       .map(MessageSourceResolvable::getDefaultMessage)
+                                       .toList();
         String message = errors.stream().findFirst().orElse(BAD_REQUEST_REASON);
         return response(HttpStatus.BAD_REQUEST, BAD_REQUEST_REASON, message, errors);
     }
 
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     private ResponseEntity<ApiError> handleArgumentTypeMismatch(MethodArgumentTypeMismatchException exception) {
-        String type =exception.getRequiredType() == null
+        String type = exception.getRequiredType() == null
                 ? "неизвестно"
                 : exception.getRequiredType().getSimpleName();
         String message = "Параметр " + exception.getName()
-            + ": неверное значение " + exception.getValue()
-                + ", ожидался тип " +type;
+                + ": неверное значение " + exception.getValue()
+                + ", ожидался тип " + type;
         return response(HttpStatus.BAD_REQUEST, BAD_REQUEST_REASON, message, List.of(message));
     }
 

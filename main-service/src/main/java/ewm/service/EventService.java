@@ -16,9 +16,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -45,9 +47,16 @@ public class EventService {
         userRepository.findById(userId)
                       .orElseThrow(() -> new NotFoundException("Пользователь с ID: " + userId + " не найден"));
         Pageable pageable = PageRequest.of(from / size, size);
-        List<Event> events = eventRepository.findAllByInitiatorId(userId, pageable);
+        List<Event> events = eventRepository.findAllByInitiator_Id(userId, pageable);
         return events.stream()
                      .map(event -> EventMapper.toShortDto(event, 0L, 0L))
                      .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public EventFullDto findUserEvent(Long userId, Long eventId) {
+        Event event = eventRepository.findByIdAndInitiator_Id(eventId, userId)
+                                     .orElseThrow(() -> new NotFoundException("Событие с ID: " + eventId + " не найдено"));
+        return EventMapper.toFullDto(event, 0L, 0L);
     }
 }
