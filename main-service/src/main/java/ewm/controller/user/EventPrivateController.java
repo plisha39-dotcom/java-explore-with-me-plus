@@ -3,12 +3,14 @@ package ewm.controller.user;
 import ewm.dto.EventFullDto;
 import ewm.dto.EventShortDto;
 import ewm.dto.NewEventDto;
+import ewm.dto.UpdateEventUserRequest;
 import ewm.service.EventService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -46,5 +48,12 @@ public class EventPrivateController {
     public EventFullDto findUserEvent(@PathVariable Long userId,
                                             @PathVariable Long eventId) {
         return eventService.findUserEvent(userId, eventId);
+    }
+
+    @PatchMapping("/{userId}/events/{eventId}")
+    public EventFullDto update(@PathVariable Long userId,
+                               @PathVariable Long eventId,
+                               @RequestBody @Valid UpdateEventUserRequest updateEventUserRequest) {
+        return eventService.update(userId, eventId, updateEventUserRequest);
     }
 }

@@ -3,11 +3,15 @@ package ewm.service;
 import ewm.dto.EventFullDto;
 import ewm.dto.EventShortDto;
 import ewm.dto.NewEventDto;
+import ewm.dto.UpdateEventUserRequest;
 import ewm.exception.BadRequestException;
+import ewm.exception.ConflictException;
 import ewm.exception.NotFoundException;
 import ewm.mapper.EventMapper;
 import ewm.model.Category;
 import ewm.model.Event;
+import ewm.model.EventState;
+import ewm.model.Location;
 import ewm.model.User;
 import ewm.repository.CategoryRepository;
 import ewm.repository.EventRepository;
@@ -20,7 +24,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -58,5 +61,57 @@ public class EventService {
         Event event = eventRepository.findByIdAndInitiator_Id(eventId, userId)
                                      .orElseThrow(() -> new NotFoundException("Событие с ID: " + eventId + " не найдено"));
         return EventMapper.toFullDto(event, 0L, 0L);
+    }
+
+    @Transactional
+    public EventFullDto update(Long userId, Long eventId, UpdateEventUserRequest updateEventUserRequest) {
+        Event event = eventRepository.findByIdAndInitiator_Id(eventId, userId)
+                .orElseThrow(() -> new NotFoundException("Событие с ID: " + eventId + " не найдено"));
+        if (event.getState() != EventState.PENDING && event.getState() != EventState.CANCELED) {
+            throw new ConflictException("Изменить можно только со статусом PENDING или CANCELED");
+        }
+        if (updateEventUserRequest.getAnnotation() != null) {
+            event.setAnnotation(updateEventUserRequest.getAnnotation());
+        }
+        if (updateEventUserRequest.getCategory() != null) {
+            Category category = categoryRepository.findById(updateEventUserRequest.getCategory())
+                                                  .orElseThrow(() -> new NotFoundException("Категория не найдена"));
+            event.setCategory(category);
+        }
+        if (updateEventUserRequest.getDescription() != null) {
+            event.setDescription(updateEventUserRequest.getDescription());
+        }
+        if (updateEventUserRequest.getEventDate() != null) {
+            if (updateEventUserRequest.getEventDate().isBefore(LocalDateTime.now().plusHours(2))) {
+                throw new BadRequestException("Неверная дата события");
+            }
+            event.setEventDate(updateEventUserRequest.getEventDate());
+        }
+        if (updateEventUserRequest.getLocation() != null) {
+            Location location = new Location();
+            location.setLat(updateEventUserRequest.getLocation().getLat());
+            location.setLon(updateEventUserRequest.getLocation().getLon());
+            event.setLocation(location);
+        }
+        if (updateEventUserRequest.getPaid() != null) {
+            event.setPaid(updateEventUserRequest.getPaid());
+        }
+        if (updateEventUserRequest.getParticipantLimit() != null) {
+            event.setParticipantLimit(updateEventUserRequest.getParticipantLimit());
+        }
+        if (updateEventUserRequest.getRequestModeration() != null) {
+            event.setRequestModeration(updateEventUserRequest.getRequestModeration());
+        }
+        if (updateEventUserRequest.getStateAction() != null) {
+            event.setState(switch (updateEventUserRequest.getStateAction()) {
+                case SEND_TO_REVIEW -> EventState.PENDING;
+                case CANCEL_REVIEW -> EventState.CANCELED;
+            });
+        }
+        if (updateEventUserRequest.getTitle() != null) {
+            event.setTitle(updateEventUserRequest.getTitle());
+        }
+        Event savedEvent = eventRepository.save(event);
+        return EventMapper.toFullDto(savedEvent, 0L, 0L);
     }
 }
