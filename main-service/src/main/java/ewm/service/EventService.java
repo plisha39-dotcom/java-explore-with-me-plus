@@ -3,6 +3,7 @@ package ewm.service;
 import ewm.dto.EventFullDto;
 import ewm.dto.EventShortDto;
 import ewm.dto.NewEventDto;
+import ewm.dto.UpdateEventAdminRequest;
 import ewm.dto.UpdateEventUserRequest;
 import ewm.exception.BadRequestException;
 import ewm.exception.ConflictException;
@@ -32,6 +33,7 @@ public class EventService {
     private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
 
+    @Transactional
     public EventFullDto create(Long userId, NewEventDto newEventDto) {
         User user = userRepository.findById(userId)
                                   .orElseThrow(() -> new NotFoundException("Пользователь с ID: " + userId + " не найден"));
@@ -46,6 +48,7 @@ public class EventService {
         return EventMapper.toFullDto(savedEvent, 0L, 0L);
     }
 
+    @Transactional(readOnly = true)
     public List<EventShortDto> findAllByUser(Long userId, int from, int size) {
         userRepository.findById(userId)
                       .orElseThrow(() -> new NotFoundException("Пользователь с ID: " + userId + " не найден"));
@@ -66,20 +69,14 @@ public class EventService {
     @Transactional
     public EventFullDto update(Long userId, Long eventId, UpdateEventUserRequest updateEventUserRequest) {
         Event event = eventRepository.findByIdAndInitiator_Id(eventId, userId)
-                .orElseThrow(() -> new NotFoundException("Событие с ID: " + eventId + " не найдено"));
+                                     .orElseThrow(() -> new NotFoundException("Событие с ID: " + eventId + " не найдено"));
         if (event.getState() != EventState.PENDING && event.getState() != EventState.CANCELED) {
             throw new ConflictException("Изменить можно только со статусом PENDING или CANCELED");
-        }
-        if (updateEventUserRequest.getAnnotation() != null) {
-            event.setAnnotation(updateEventUserRequest.getAnnotation());
         }
         if (updateEventUserRequest.getCategory() != null) {
             Category category = categoryRepository.findById(updateEventUserRequest.getCategory())
                                                   .orElseThrow(() -> new NotFoundException("Категория не найдена"));
             event.setCategory(category);
-        }
-        if (updateEventUserRequest.getDescription() != null) {
-            event.setDescription(updateEventUserRequest.getDescription());
         }
         if (updateEventUserRequest.getEventDate() != null) {
             if (updateEventUserRequest.getEventDate().isBefore(LocalDateTime.now().plusHours(2))) {
@@ -87,29 +84,53 @@ public class EventService {
             }
             event.setEventDate(updateEventUserRequest.getEventDate());
         }
-        if (updateEventUserRequest.getLocation() != null) {
-            Location location = new Location();
-            location.setLat(updateEventUserRequest.getLocation().getLat());
-            location.setLon(updateEventUserRequest.getLocation().getLon());
-            event.setLocation(location);
-        }
-        if (updateEventUserRequest.getPaid() != null) {
-            event.setPaid(updateEventUserRequest.getPaid());
-        }
-        if (updateEventUserRequest.getParticipantLimit() != null) {
-            event.setParticipantLimit(updateEventUserRequest.getParticipantLimit());
-        }
-        if (updateEventUserRequest.getRequestModeration() != null) {
-            event.setRequestModeration(updateEventUserRequest.getRequestModeration());
-        }
         if (updateEventUserRequest.getStateAction() != null) {
             event.setState(switch (updateEventUserRequest.getStateAction()) {
                 case SEND_TO_REVIEW -> EventState.PENDING;
                 case CANCEL_REVIEW -> EventState.CANCELED;
             });
         }
-        if (updateEventUserRequest.getTitle() != null) {
-            event.setTitle(updateEventUserRequest.getTitle());
+        EventMapper.applyUserUpdate(event, updateEventUserRequest);
+        Event savedEvent = eventRepository.save(event);
+        return EventMapper.toFullDto(savedEvent, 0L, 0L);
+
+    }
+
+    @Transactional
+    public EventFullDto adminUpdate(Long eventId, UpdateEventAdminRequest updateEventAdminRequest) {
+        Event event = eventRepository.findById(eventId)
+                                     .orElseThrow(() -> new NotFoundException("Событие с ID: " + eventId + " не найдено"));
+        if (updateEventAdminRequest.getCategory() != null) {
+            Category category = categoryRepository.findById(updateEventAdminRequest.getCategory())
+                                                  .orElseThrow(() -> new NotFoundException("Категория не найдена"));
+            event.setCategory(category);
+        }
+        if (updateEventAdminRequest.getEventDate() != null) {
+            if (updateEventAdminRequest.getEventDate().isBefore(LocalDateTime.now().plusHours(2))) {
+                throw new BadRequestException("Неверная дата события");
+            }
+            event.setEventDate(updateEventAdminRequest.getEventDate());
+        }
+        EventMapper.applyAdminUpdate(event, updateEventAdminRequest);
+        if (updateEventAdminRequest.getStateAction() != null) {
+            switch (updateEventAdminRequest.getStateAction()) {
+                case PUBLISH_EVENT -> {
+                    if (event.getState() != EventState.PENDING) {
+                        throw new ConflictException("Нельзя изменить опубликованное событие");
+                    }
+                    if (event.getEventDate().isBefore(LocalDateTime.now().plusHours(1))) {
+                        throw new ConflictException("Дата начала события должна быть не ранее чем через час");
+                    }
+                    event.setState(EventState.PUBLISHED);
+                    event.setPublishedOn(LocalDateTime.now());
+                }
+                case REJECT_EVENT -> {
+                    if (event.getState() != EventState.PENDING) {
+                        throw new ConflictException("Нельзя изменить опубликованное событие");
+                    }
+                    event.setState(EventState.CANCELED);
+                }
+            }
         }
         Event savedEvent = eventRepository.save(event);
         return EventMapper.toFullDto(savedEvent, 0L, 0L);

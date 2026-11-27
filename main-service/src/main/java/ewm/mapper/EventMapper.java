@@ -5,6 +5,8 @@ import ewm.dto.EventFullDto;
 import ewm.dto.EventShortDto;
 import ewm.dto.LocationDto;
 import ewm.dto.NewEventDto;
+import ewm.dto.UpdateEventAdminRequest;
+import ewm.dto.UpdateEventUserRequest;
 import ewm.dto.UserShortDto;
 import ewm.model.Category;
 import ewm.model.Event;
@@ -77,12 +79,66 @@ public class EventMapper {
                             .id(event.getId())
                             .annotation(event.getAnnotation())
                             .category(toCategoryDto(event.getCategory()))
-                            .confirmedRequests(views)
+                            .confirmedRequests(confirmedRequests)
                             .eventDate(event.getEventDate())
                             .initiator(toUserShortDto(event.getInitiator()))
                             .paid(event.isPaid())
                             .title(event.getTitle())
-                            .views(confirmedRequests)
+                            .views(views)
                             .build();
+    }
+
+    public static void applyUserUpdate(Event event, UpdateEventUserRequest updateEventUserRequest) {
+        if (updateEventUserRequest.getAnnotation() != null) {
+            event.setAnnotation(updateEventUserRequest.getAnnotation());
+        }
+        if (updateEventUserRequest.getDescription() != null) {
+            event.setDescription(updateEventUserRequest.getDescription());
+        }
+        if (updateEventUserRequest.getLocation() != null) {
+            Location location = new Location();
+            location.setLat(updateEventUserRequest.getLocation().getLat());
+            location.setLon(updateEventUserRequest.getLocation().getLon());
+            event.setLocation(location);
+        }
+        if (updateEventUserRequest.getPaid() != null) {
+            event.setPaid(updateEventUserRequest.getPaid());
+        }
+        if (updateEventUserRequest.getParticipantLimit() != null) {
+            event.setParticipantLimit(updateEventUserRequest.getParticipantLimit());
+        }
+        if (updateEventUserRequest.getRequestModeration() != null) {
+            event.setRequestModeration(updateEventUserRequest.getRequestModeration());
+        }
+        if (updateEventUserRequest.getTitle() != null) {
+            event.setTitle(updateEventUserRequest.getTitle());
+        }
+    }
+
+    public static void applyAdminUpdate(Event event, UpdateEventAdminRequest updateEventAdminRequest) {
+        if (updateEventAdminRequest.getAnnotation() != null) {
+            event.setAnnotation(updateEventAdminRequest.getAnnotation());
+        }
+        if (updateEventAdminRequest.getDescription() != null) {
+            event.setDescription(updateEventAdminRequest.getDescription());
+        }
+        if (updateEventAdminRequest.getLocation() != null) {
+            Location location = new Location();
+            location.setLat(updateEventAdminRequest.getLocation().getLat());
+            location.setLon(updateEventAdminRequest.getLocation().getLon());
+            event.setLocation(location);
+        }
+        if (updateEventAdminRequest.getPaid() != null) {
+            event.setPaid(updateEventAdminRequest.getPaid());
+        }
+        if (updateEventAdminRequest.getParticipantLimit() != null) {
+            event.setParticipantLimit(updateEventAdminRequest.getParticipantLimit());
+        }
+        if (updateEventAdminRequest.getRequestModeration() != null) {
+            event.setRequestModeration(updateEventAdminRequest.getRequestModeration());
+        }
+        if (updateEventAdminRequest.getTitle() != null) {
+            event.setTitle(updateEventAdminRequest.getTitle());
+        }
     }
 }
