@@ -12,14 +12,16 @@ import ewm.mapper.EventMapper;
 import ewm.model.Category;
 import ewm.model.Event;
 import ewm.model.EventState;
-import ewm.model.Location;
 import ewm.model.User;
 import ewm.repository.CategoryRepository;
 import ewm.repository.EventRepository;
 import ewm.repository.UserRepository;
+import ewm.specification.EventSpecifications;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -134,5 +136,20 @@ public class EventService {
         }
         Event savedEvent = eventRepository.save(event);
         return EventMapper.toFullDto(savedEvent, 0L, 0L);
+    }
+
+    @Transactional(readOnly = true)
+    public List<EventFullDto> adminFindAll(List<Long> users, List<EventState> states, List<Long> categories,
+                                           LocalDateTime start, LocalDateTime end, int from, int size) {
+        if (start != null && end != null && start.isAfter(end)) {
+            throw new BadRequestException("Некорректный диапазон дат");
+        }
+        Specification<Event> spec = EventSpecifications.build(users, states, categories, start, end);
+        Pageable pageable = PageRequest.of(from / size, size);
+        Page<Event> page = eventRepository.findAll(spec, pageable);
+        List<Event> events = page.getContent();
+        return events.stream()
+                     .map(event -> EventMapper.toFullDto(event, 0L, 0L))
+                     .toList();
     }
 }
