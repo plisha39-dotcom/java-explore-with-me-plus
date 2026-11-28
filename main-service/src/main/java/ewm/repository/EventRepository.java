@@ -1,6 +1,5 @@
 package ewm.repository;
 
-import ewm.dto.EventFullDto;
 import ewm.model.Event;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
