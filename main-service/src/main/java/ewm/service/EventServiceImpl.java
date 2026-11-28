@@ -18,7 +18,7 @@ import java.util.Comparator;
 import java.util.List;
 
 @Service
-public class EventServiceImpl implements EventService {
+public class EventServiceImpl {
     private final EventRepository eventRepository;
     private final StatClient statClient;
     private final ParticipationRequestRepository participationRequestRepository;
@@ -31,7 +31,6 @@ public class EventServiceImpl implements EventService {
         this.participationRequestRepository = participationRequestRepository;
     }
 
-    @Override
     public List<EventShortDto> getEvents(String text,
                                          Integer[] categories,
                                          boolean paid,
@@ -87,6 +86,8 @@ public class EventServiceImpl implements EventService {
                             Integer.toUnsignedLong(participationRequestRepository.findByEventId(event.getId()).size()))
                     )
                     .sorted(comparator)
+                    .skip(from)
+                    .limit(size)
                     .toList();
         } else {
             return events.stream()
@@ -102,11 +103,12 @@ public class EventServiceImpl implements EventService {
                             Integer.toUnsignedLong(participationRequestRepository.findByEventId(event.getId()).size()))
                     )
                     .sorted(comparator)
+                    .skip(from)
+                    .limit(size)
                     .toList();
         }
     }
 
-    @Override
     public EventFullDto getEventById(Long eventId, String remoteAddr, String requestURI) {
         Event event = eventRepository.findById(eventId).orElseThrow();
         EndpointHit endpointHit = new EndpointHit("ewm-main-service", requestURI, remoteAddr, LocalDateTime.now());

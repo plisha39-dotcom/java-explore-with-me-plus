@@ -3,7 +3,7 @@ package ewm.controller;
 import ewm.dto.EventFullDto;
 import ewm.dto.EventShortDto;
 import ewm.model.Sort;
-import ewm.service.EventService;
+import ewm.service.EventServiceImpl;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -15,9 +15,9 @@ import java.util.List;
 
 @RestController("/events")
 public class EventsController {
-    public final EventService eventService;
+    public final EventServiceImpl eventService;
 
-    public EventsController(EventService eventService) {
+    public EventsController(EventServiceImpl eventService) {
         this.eventService = eventService;
     }
 
