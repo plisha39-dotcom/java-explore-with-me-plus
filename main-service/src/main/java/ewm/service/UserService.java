@@ -6,7 +6,9 @@ import ewm.exception.ConflictException;
 import ewm.exception.NotFoundException;
 import ewm.mapper.UserMapper;
 import ewm.model.User;
+import ewm.repository.EventRepository;
 import ewm.repository.OffsetBasedPageRequest;
+import ewm.repository.ParticipationRequestRepository;
 import ewm.repository.UserRepository;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -19,9 +21,14 @@ import java.util.List;
 @Transactional
 public class UserService {
     private final UserRepository userRepository;
+    private final EventRepository eventRepository;
+    private final ParticipationRequestRepository requestRepository;
 
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository, EventRepository eventRepository,
+                       ParticipationRequestRepository requestRepository) {
         this.userRepository = userRepository;
+        this.eventRepository = eventRepository;
+        this.requestRepository = requestRepository;
     }
 
     public UserDto create(NewUserRequest request) {
@@ -49,6 +56,10 @@ public class UserService {
     public void delete(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("User with id=" + userId + " was not found"));
+        if (eventRepository.existsByInitiator_Id(userId)
+                || requestRepository.existsByRequester_Id(userId)) {
+            throw new ConflictException("User with id=" + userId + " is referenced by events or requests");
+        }
         userRepository.delete(user);
     }
 }
